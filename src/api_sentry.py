@@ -1,41 +1,36 @@
 import json
 from dataclasses import dataclass
-from datetime import datetime
-from typing import List, Dict
+from typing import List
 
 @dataclass
-class PerformanceMetric:
-    endpoint: str
+class Endpoint:
+    url: str
+    method: str
+
+@dataclass
+class Metric:
+    endpoint: Endpoint
     response_time: float
-    status_code: int
-    timestamp: datetime
 
 class ApiSentry:
     def __init__(self):
+        self.endpoints = []
         self.metrics = []
 
-    def add_metric(self, metric: PerformanceMetric):
+    def configure(self, endpoint: Endpoint):
+        self.endpoints.append(endpoint)
+
+    def collect_metrics(self, endpoint: Endpoint, response_time: float):
+        metric = Metric(endpoint, response_time)
         self.metrics.append(metric)
 
-    def get_historical_data(self, endpoint: str) -> List[PerformanceMetric]:
-        return [metric for metric in self.metrics if metric.endpoint == endpoint]
+    def get_metrics(self) -> List[Metric]:
+        return self.metrics
 
-    def get_trend_analysis(self, endpoint: str) -> Dict[str, float]:
-        metrics = self.get_historical_data(endpoint)
-        if not metrics:
-            return {}
-        response_times = [metric.response_time for metric in metrics]
-        average_response_time = sum(response_times) / len(response_times)
-        return {"average_response_time": average_response_time}
+    def detect_performance_degradation(self, threshold: float) -> List[Metric]:
+        degraded_metrics = [metric for metric in self.metrics if metric.response_time > threshold]
+        return degraded_metrics
 
-    def filter_metrics(self, endpoint: str, status_code: int) -> List[PerformanceMetric]:
-        return [metric for metric in self.metrics if metric.endpoint == endpoint and metric.status_code == status_code]
-
-    def sort_metrics(self, endpoint: str, sort_by: str) -> List[PerformanceMetric]:
-        metrics = self.get_historical_data(endpoint)
-        if sort_by == "response_time":
-            return sorted(metrics, key=lambda x: x.response_time)
-        elif sort_by == "timestamp":
-            return sorted(metrics, key=lambda x: x.timestamp)
-        else:
-            raise ValueError("Invalid sort_by parameter")
+    def send_alerts(self, degraded_metrics: List[Metric]):
+        for metric in degraded_metrics:
+            print(f"Alert: {metric.endpoint.url} is experiencing performance degradation with response time {metric.response_time} seconds")
