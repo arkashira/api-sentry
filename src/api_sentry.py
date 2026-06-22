@@ -1,36 +1,32 @@
 import json
 from dataclasses import dataclass
-from typing import List
+from typing import Optional
+from unittest.mock import patch
 
 @dataclass
-class Endpoint:
-    url: str
-    method: str
+class ProviderStatus:
+    outage: bool
+    link: Optional[str]
+    eta: Optional[str]
 
-@dataclass
-class Metric:
-    endpoint: Endpoint
-    response_time: float
+def get_provider_status() -> ProviderStatus:
+    # Simulate provider status API query
+    return ProviderStatus(outage=True, link="https://example.com/outage", eta="1 hour")
 
-class ApiSentry:
-    def __init__(self):
-        self.endpoints = []
-        self.metrics = []
+def diagnose_error_rate(error_rate: float, duration: int) -> str:
+    if error_rate > 10 and duration >= 5:
+        status = get_provider_status()
+        if status.outage:
+            return f"Provider outage detected. Link: {status.link}, ETA: {status.eta}"
+        else:
+            return "No provider outage detected. Check quota limits."
+    else:
+        return "Error rate is not high enough to trigger diagnosis."
 
-    def configure(self, endpoint: Endpoint):
-        self.endpoints.append(endpoint)
+def main():
+    error_rate = 15.0
+    duration = 10
+    print(diagnose_error_rate(error_rate, duration))
 
-    def collect_metrics(self, endpoint: Endpoint, response_time: float):
-        metric = Metric(endpoint, response_time)
-        self.metrics.append(metric)
-
-    def get_metrics(self) -> List[Metric]:
-        return self.metrics
-
-    def detect_performance_degradation(self, threshold: float) -> List[Metric]:
-        degraded_metrics = [metric for metric in self.metrics if metric.response_time > threshold]
-        return degraded_metrics
-
-    def send_alerts(self, degraded_metrics: List[Metric]):
-        for metric in degraded_metrics:
-            print(f"Alert: {metric.endpoint.url} is experiencing performance degradation with response time {metric.response_time} seconds")
+if __name__ == "__main__":
+    main()
