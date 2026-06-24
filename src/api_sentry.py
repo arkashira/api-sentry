@@ -1,32 +1,42 @@
 import json
 from dataclasses import dataclass
-from typing import Optional
-from unittest.mock import patch
 
 @dataclass
-class ProviderStatus:
-    outage: bool
-    link: Optional[str]
-    eta: Optional[str]
+class ApiSentryConfig:
+    license: str
+    status: str
 
-def get_provider_status() -> ProviderStatus:
-    # Simulate provider status API query
-    return ProviderStatus(outage=True, link="https://example.com/outage", eta="1 hour")
+class ApiSentry:
+    def __init__(self, config: ApiSentryConfig):
+        self.config = config
 
-def diagnose_error_rate(error_rate: float, duration: int) -> str:
-    if error_rate > 10 and duration >= 5:
-        status = get_provider_status()
-        if status.outage:
-            return f"Provider outage detected. Link: {status.link}, ETA: {status.eta}"
-        else:
-            return "No provider outage detected. Check quota limits."
-    else:
-        return "Error rate is not high enough to trigger diagnosis."
+    def get_badges(self):
+        return {
+            "License": self.config.license,
+            "Status": self.config.status
+        }
 
-def main():
-    error_rate = 15.0
-    duration = 10
-    print(diagnose_error_rate(error_rate, duration))
+    def get_features(self):
+        return [
+            {"Feature": "Feature 1", "Description": "Description 1"},
+            {"Feature": "Feature 2", "Description": "Description 2"}
+        ]
 
-if __name__ == "__main__":
-    main()
+    def get_why_api_sentry(self):
+        return [
+            "Reason 1",
+            "Reason 2",
+            "Reason 3",
+            "Reason 4",
+            "Reason 5"
+        ]
+
+    def get_project_structure(self):
+        return {
+            "src": ["api_sentry.py"],
+            "tests": ["test_api_sentry.py"],
+            "README.md": []
+        }
+
+    def get_getting_started(self):
+        return "Getting started with api-sentry"
